@@ -38,7 +38,16 @@ function ramp_for_gutenberg_load_gutenberg( $criteria = false ) {
 	if ( !is_admin() ) {
 		return;
 	}
+
 	$RFG = Ramp_For_Gutenberg::get_instance();
+
+	// Checks to see if we've previously called this function.
+	$show_rfg_admin_notice = apply_filters( 'ramp_for_gutenberg_show_admin_notice', true );
+	if ( true === $RFG->active && $show_rfg_admin_notice ) {
+		add_action( 'admin_notices', 'ramp_for_gutenberg_admin_notice' );
+		return;
+	}
+
 	$criteria = ( !$criteria ) ? [ 'load' => 1 ] : $criteria;
 	$stored_criteria = $RFG->get_criteria();
 	if ( $criteria !== $stored_criteria ) {
@@ -47,6 +56,21 @@ function ramp_for_gutenberg_load_gutenberg( $criteria = false ) {
 	}
 	// indicate that we've loaded the plugin. 
 	$RFG->active = true;
+}
+
+/**
+ * Adds admin notice error if `ramp_for_gutenberg_load_gutenberg()` is called more than once.
+ *
+ * @since 0.1
+ */
+function ramp_for_gutenberg_admin_notice() {
+
+	// TODO: Make this _actually_ dismissible
+	$class   = 'notice notice-error is-dismissible';
+	$message = __( 'was called multiple times. This may cause unexpected behavior.', 'ramp-for-gutenberg' );
+
+	printf( '<div class="%1$s"><p><code>ramp_for_gutenberg_load_gutenberg()</code> %2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+
 }
 
 /** grab the plugin **/
